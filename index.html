@@ -1236,32 +1236,53 @@ function App() {
           ? GROUPS[activeSceneObj.groups[0]]?.color
           : null;
 
+        const renderSceneBar = () => SCENES.map(scene => {
+          const isActive = activeScene === scene.id;
+          const color    = GROUPS[scene.groups[0]]?.color || '#64748b';
+          return (
+            <button
+              key={scene.id}
+              onClick={() => selectScene(scene.id)}
+              className="scene-btn"
+              style={{
+                background:  isActive ? color : '#f8fafc',
+                color:       isActive ? '#fff' : color,
+                borderColor: isActive ? color : color + '55',
+                boxShadow:   isActive ? `0 2px 8px ${color}38` : 'none',
+              }}
+            >
+              <span className="scene-btn-num">{scene.num}</span>
+              <span className="scene-btn-emoji">{scene.emoji}</span>
+            </button>
+          );
+        });
+
         return (
           <nav className="tab-nav">
-            {/* Mobile-only collapse toggle */}
+
+            {/* ── Scene bar: always visible (mobile + desktop) ── */}
+            <div className="nav-label">Scene</div>
+            <div className="scene-bar">{renderSceneBar()}</div>
+
+            <div className="scene-bar-divider" />
+
+            {/* ── Group toggle (mobile only) ── */}
             <button
               className="filter-toggle"
               onClick={() => setFilterOpen(o => !o)}
               aria-expanded={filterOpen}
             >
               <div className="filter-toggle-left">
-                <span>🎯 Filter</span>
-                {chipLabel && (
-                  <span
-                    className="filter-toggle-chip active"
-                    style={{ '--chip-color': chipColor }}
-                  >
-                    {chipLabel}
-                  </span>
-                )}
-                {!chipLabel && (
-                  <span className="filter-toggle-chip">All Scenes</span>
-                )}
+                <span>👥 Group</span>
+                {activeGroup
+                  ? <span className="filter-toggle-chip active" style={{ '--chip-color': chipColor }}>{chipLabel}</span>
+                  : <span className="filter-toggle-chip">All Groups</span>
+                }
               </div>
               <span className={`filter-toggle-chevron${filterOpen ? ' open' : ''}`}>▼</span>
             </button>
 
-            {/* Filter body — always visible on desktop, collapsible on mobile */}
+            {/* ── Group section: collapsible mobile / always desktop ── */}
             <div className={`filter-body${filterOpen ? ' is-open' : ''}`}>
               <div className="filter-body-inner">
                 <div className="nav-label">Group</div>
@@ -1302,33 +1323,9 @@ function App() {
                     );
                   })}
                 </div>
-
-                <div className="scene-bar-divider" />
-                <div className="nav-label">Scene</div>
-                <div className="scene-bar">
-                  {SCENES.map(scene => {
-                    const isActive = activeScene === scene.id;
-                    const color    = GROUPS[scene.groups[0]]?.color || '#64748b';
-                    return (
-                      <button
-                        key={scene.id}
-                        onClick={() => { selectScene(scene.id); setFilterOpen(false); }}
-                        className="scene-btn"
-                        style={{
-                          background:  isActive ? color : '#f8fafc',
-                          color:       isActive ? '#fff' : color,
-                          borderColor: isActive ? color : color + '55',
-                          boxShadow:   isActive ? `0 2px 8px ${color}38` : 'none',
-                        }}
-                      >
-                        <span className="scene-btn-num">{scene.num}</span>
-                        <span className="scene-btn-emoji">{scene.emoji}</span>
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             </div>
+
           </nav>
         );
       })()}
