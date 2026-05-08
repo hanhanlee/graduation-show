@@ -110,6 +110,7 @@
       pointer-events: none;
       z-index: 1;    /* caps: below main content */
       overflow: hidden;
+      transition: opacity 0.5s ease;
     }
 
     /* Stars: born at top, fall downward */
@@ -864,6 +865,19 @@ function LineBubble({ item, activeGroup }) {
 const CONF_COLORS = ['#F59E0B','#EC4899','#8B5CF6','#3B82F6','#10B981','#EF4444','#F97316','#FFD700','#e879f9','#38bdf8','#fb7185','#a3e635'];
 
 function GradCelebration() {
+  const [capsVisible, setCapsVisible] = React.useState(true);
+
+  React.useEffect(() => {
+    const onScroll = () => {
+      // Only hide on mobile screens
+      if (window.innerWidth <= 640) {
+        setCapsVisible(window.scrollY < 100);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const pieces = React.useMemo(() => {
     const p = [];
 
@@ -931,8 +945,12 @@ function GradCelebration() {
 
   return (
     <>
-      {/* Caps — behind main content (z-index: 1) */}
-      <div className="grad-caps-layer" aria-hidden="true">
+      {/* Caps — behind main content, hidden when scrolled on mobile */}
+      <div
+        className="grad-caps-layer"
+        aria-hidden="true"
+        style={{ opacity: capsVisible ? 1 : 0 }}
+      >
         {caps.map(renderCap)}
       </div>
 
