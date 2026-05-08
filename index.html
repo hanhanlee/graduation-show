@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f0f4ff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Juliette and the Musketeers! 🎭</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f0f4ff;
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: #1e293b;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button {
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:focus-visible { outline: 3px solid #6366f1; outline-offset: 3px; }
+
+    .app-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 16px calc(36px + env(safe-area-inset-bottom));
+    }
+    @media (max-width: 480px) {
+      .app-wrap { padding: 0 10px calc(24px + env(safe-area-inset-bottom)); }
+    }
+
+    /* ── Header ── */
+    .app-header { text-align: center; padding: 28px 16px 20px; }
+    .banner-stars {
+      display: flex; justify-content: center; gap: 6px; margin-bottom: 10px;
+    }
+    .banner-star {
+      font-size: clamp(14px, 3vw, 20px);
+      display: inline-block;
+      animation: starFloat 2.2s ease-in-out infinite;
+    }
+    .header-main-emoji {
+      font-size: clamp(48px, 12vw, 72px);
+      display: block;
+      margin-bottom: 10px;
+      animation: heroFloat 3.5s ease-in-out infinite;
+    }
+    .app-title {
+      font-size: clamp(22px, 6vw, 40px);
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #F59E0B 0%, #EC4899 35%, #8B5CF6 65%, #3B82F6 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradShift 5s ease infinite;
+    }
+    .app-subtitle {
+      font-size: clamp(13px, 3vw, 16px);
+      font-weight: 800;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+    .app-motto {
+      font-size: clamp(12px, 2.5vw, 14px);
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    @media (max-width: 480px) { .app-header { padding: 16px 8px 12px; } }
+
+    /* ── Tab nav ── */
+    .tab-nav {
+      background: #fff;
+      border-radius: 18px;
+      padding: 12px 12px 10px;
+      box-shadow: 0 2px 18px rgba(0,0,0,.09);
+      margin-bottom: 16px;
+      position: sticky;
+      top: 6px;
+      z-index: 100;
+    }
+    .nav-label {
+      font-size: 10px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: #94a3b8; margin-bottom: 7px; padding-left: 2px;
+    }
+    /* Group row — 3-column grid */
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .tab-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 5px; text-align: center;
+      padding: 10px 8px;
+      border-radius: 14px;
+      font-size: clamp(12px, 3vw, 14px);
+      font-weight: 800;
+      border: 2px solid;
+      line-height: 1.25;
+      transition: background .18s, color .18s, border-color .18s, transform .1s, box-shadow .18s;
+      min-height: 44px;
+    }
+    .tab-btn-all {
+      grid-column: 1 / -1;  /* spans all 3 columns */
+      border-radius: 12px;
+    }
+    .tab-btn:active { transform: scale(.93); }
+
+    /* Scene row — equal-width cards in one row */
+    .scene-bar-divider { height: 1.5px; background: #f1f5f9; margin: 10px 0; }
+    .scene-bar {
+      display: flex; gap: 5px;
+    }
+    .scene-btn {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px;
+      padding: 8px 2px;
+      border-radius: 14px;
+      border: 2px solid;
+      min-height: 60px;
+      transition: background .15s, color .15s, border-color .15s, transform .1s, box-shadow .15s;
+    }
+    .scene-btn:active { transform: scale(.91); }
+    .scene-btn-num {
+      font-size: clamp(15px, 4vw, 18px); font-weight: 900; line-height: 1;
+    }
+    .scene-btn-emoji { font-size: clamp(16px, 4.5vw, 20px); line-height: 1; }
+
+    /* ── Group banner ── */
+    .group-banner {
+      border-radius: 16px;
+      padding: 16px 20px;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .group-banner-emoji { font-size: clamp(30px, 8vw, 44px); flex-shrink: 0; }
+    .group-banner-title {
+      font-size: clamp(18px, 5vw, 26px);
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .group-banner-sub {
+      font-size: clamp(12px, 2.8vw, 14px);
+      font-weight: 700;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    /* ── Scene card ── */
+    .scene-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 28px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+    }
+    @media (max-width: 480px) { .scene-card { border-radius: 16px; padding: 14px 12px; } }
+
+    .scene-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .scene-num-badge {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 19px;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .scene-title {
+      font-size: clamp(16px, 4.5vw, 22px);
+      font-weight: 900;
+      color: #1e293b;
+      line-height: 1.3;
+      margin-bottom: 7px;
+    }
+    .scene-meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    }
+
+    /* ── Chips ── */
+    .group-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 800;
+      border: 1.5px solid transparent;
+      white-space: nowrap;
+    }
+    .count-chip {
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      background: #f1f5f9; color: #64748b;
+    }
+
+    /* ── Scene play bar ── */
+    .scene-play-bar {
+      display: flex; gap: 8px;
+      padding: 10px 0 14px;
+      margin-bottom: 4px;
+    }
+    .scene-seq-btn {
+      flex: 1;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 8px;
+      border-radius: 12px;
+      border-width: 2px; border-style: solid;
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(13px, 3vw, 15px);
+      font-weight: 800;
+      min-height: 46px;
+      transition: opacity .15s, transform .1s;
+    }
+    .scene-seq-btn:not(:disabled):active { transform: scale(.96); }
+    .scene-seq-btn:disabled { opacity: .4; cursor: default; }
+    .scene-seq-stop {
+      flex: 1;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 8px;
+      border-radius: 12px;
+      border-width: 2px; border-style: solid;
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(13px, 3vw, 15px);
+      font-weight: 800;
+      min-height: 46px;
+      background: transparent;
+      animation: pulse .9s ease-in-out infinite;
+    }
+
+    /* ── Scene items ── */
+    .scene-items { display: flex; flex-direction: column; gap: 10px; }
+
+    /* ── Line bubble ── */
+    .line-bubble {
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 2px solid transparent;
+      border-left-width: 5px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, box-shadow .15s, opacity .15s, transform .1s;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .line-bubble:active { transform: scale(.98); }
+    .line-bubble.is-dimmed { opacity: 0.35; }
+    .line-bubble-top {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      gap: 8px; margin-bottom: 8px;
+    }
+    .line-text {
+      font-size: clamp(17px, 4.5vw, 22px);
+      font-weight: 800;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+    .line-marked-badge {
+      margin-top: 7px;
+      display: inline-block;
+      font-size: 12px; font-weight: 800;
+      padding: 3px 10px; border-radius: 6px;
+    }
+    .line-tap-hint {
+      font-size: 11px; font-weight: 700;
+      color: #cbd5e1; margin-top: 5px;
+    }
+    @media (max-width: 480px) {
+      .line-bubble { padding: 10px 11px; }
+    }
+
+    /* ── Stage direction ── */
+    .stage-direction {
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stage-direction-text {
+      font-size: clamp(14px, 3.5vw, 17px);
+      font-weight: 700;
+      font-style: italic;
+      color: #64748b;
+    }
+
+    /* ── Song cue ── */
+    .song-cue {
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .song-cue-info { display: flex; align-items: center; gap: 10px; }
+    .song-cue-emoji { font-size: clamp(22px, 5vw, 30px); }
+    .song-cue-label {
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 2px;
+    }
+    .song-cue-title {
+      font-size: clamp(15px, 4vw, 18px);
+      font-weight: 900;
+    }
+
+    /* ── Buttons ── */
+    .audio-play-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 9px;
+      border-width: 2.5px; border-style: solid;
+      font-size: 15px;
+      transition: background .15s, color .15s, transform .1s;
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+    }
+    .audio-play-btn:not(:disabled):active { transform: scale(.88); }
+
+    .song-play-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-size: clamp(13px, 3.2vw, 15px);
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      border-width: 2.5px; border-style: solid;
+      transition: all .15s;
+      min-height: 42px;
+      white-space: nowrap;
+    }
+    .song-play-btn:not(:disabled):active { transform: scale(.96); }
+    .song-play-btn:disabled { cursor: default; }
+
+    /* ── Animations ── */
+    @keyframes heroFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      30%       { transform: translateY(-12px) rotate(8deg); }
+      65%       { transform: translateY(-6px) rotate(-5deg); }
+    }
+    @keyframes starFloat {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.55; }
+      50%       { transform: translateY(-11px) scale(1.35); opacity: 1; }
+    }
+    @keyframes gradShift {
+      0%, 100% { background-position: 0% 50%; }
+      50%       { background-position: 100% 50%; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .6; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pop {
+      0%   { transform: scale(0.82); opacity: 0; }
+      70%  { transform: scale(1.07); }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+    .anim-pulse   { animation: pulse   .8s ease infinite; }
+    .anim-slideUp { animation: slideUp .32s ease both; }
+    .anim-pop     { animation: pop     .3s cubic-bezier(.34,1.56,.64,1) both; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useCallback } = React;
+
+const GROUPS = {
+  captains:       { label: 'Captains',        short: 'Captains',   emoji: '👑', color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
+  bumblebeeBoys:  { label: 'Bumblebee Boys',  short: 'BB Boys',    emoji: '🐝', color: '#CA8A04', bg: '#FEFCE8', border: '#FEF08A' },
+  bumblebeeGirls: { label: 'Bumblebee Girls', short: 'BB Girls',   emoji: '🌸', color: '#DB2777', bg: '#FDF2F8', border: '#FBCFE8' },
+  butterflyBoys:  { label: 'Butterfly Boys',  short: 'BF Boys',    emoji: '🦋', color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE' },
+  butterflyGirls: { label: 'Butterfly Girls', short: 'BF Girls',   emoji: '🌺', color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE' },
+  all:            { label: 'All Students',    short: 'All Kids',   emoji: '🌟', color: '#059669', bg: '#ECFDF5', border: '#A7F3D0' },
+};
+
+const SCENES = [
+  {
+    id: 's1', num: 1, title: 'Entrance', emoji: '🚪',
+    groups: ['captains'],
+    items: [
+      { type: 'line', group: 'captains', text: 'Musketeers move forward!',       audio: 'voice/s1/Musketeers move forward.mp3' },
+      { type: 'line', group: 'captains', text: 'Musketeers attention!',           audio: 'voice/s1/Musketeers attention.mp3' },
+      { type: 'line', group: 'captains', text: 'Musketeers address the parents!', audio: 'voice/s1/Musketeers address the parents.mp3' },
+    ],
+  },
+  {
+    id: 's2', num: 2, title: 'Introduction', emoji: '🎭',
+    groups: ['all'],
+    items: [
+      { type: 'line', group: 'all', text: 'Dear parents! Today we will tell you the story of a great hero who fought for honor, loyalty, and friendship… and also found love.', audio: 'voice/s2/Dear parents.mp3' },
+      { type: 'direction', text: 'Change positions.' },
+      { type: 'line', group: 'all', text: "It is a tale about the spirit of 'ONE FOR ALL AND ALL FOR ONE'... ON GUARD!", audio: 'voice/s2/It is a tale about.mp3' },
+    ],
+  },
+  {
+    id: 's3', num: 3, title: 'Dogtanian Gets Ready to Rumble!', emoji: '⚔️',
+    groups: ['bumblebeeBoys'],
+    items: [
+      { type: 'line', group: 'bumblebeeBoys', text: 'Dogtanian goes to Paris to be a musketeer!',                                      audio: 'voice/s3/Dogtanian goes to Paris to be a musketeer.mp3' },
+      { type: 'line', group: 'bumblebeeBoys', text: 'Oh no!',                                                                           audio: 'voice/s3/Oh no.mp3' },
+      { type: 'line', group: 'bumblebeeBoys', text: 'He bumps into Porthos, Athos, and Aramis… and is going to duel with all of them!', audio: 'voice/s3/He bumps into.mp3' },
+      { type: 'line', group: 'bumblebeeBoys', text: "Dogtanian is ready to show he's the best swordsman.",                             audio: 'voice/s3/Dogtanian is ready to show.mp3' },
+      { type: 'line', group: 'bumblebeeBoys', text: "There's going to be trouble in Paris!",                                           audio: "voice/s3/There's going to be trouble in Paris.mp3" },
+      { type: 'line', group: 'bumblebeeBoys', text: 'Get ready!',                                                                       audio: 'voice/s3/Get ready.mp3' },
+      { type: 'song', title: "Let's Get Ready to Rumble", emoji: '🥊', audio: "music/Let's Get Ready to Rhumble.mp3" },
+    ],
+  },
+  {
+    id: 's4', num: 4, title: 'Somewhere Out There', emoji: '🌙',
+    groups: ['bumblebeeGirls'],
+    items: [
+      { type: 'line', group: 'bumblebeeGirls', text: 'Juliette is on a secret mission for the queen.',              audio: 'voice/s4/Juliette is on a secret mission.mp3' },
+      { type: 'line', group: 'bumblebeeGirls', text: 'Her carriage splashes mud on Dogtanian!',                     audio: 'voice/s4/Her carriage splashes mud on Dogtanian.mp3' },
+      { type: 'line', group: 'bumblebeeGirls', text: 'She gives him her handkerchief but Dogtanian rushes away!',   audio: 'voice/s4/She gives him her handkerchief.mp3' },
+      { type: 'line', group: 'bumblebeeGirls', text: 'Who is this dashing new swordsman?',                          audio: 'voice/s4/Who is this dashing.mp3' },
+      { type: 'line', group: 'bumblebeeGirls', text: 'He must be in Paris somewhere…',                              audio: 'voice/s4/He must be in Paris somewhere.mp3' },
+      { type: 'line', group: 'bumblebeeGirls', text: 'somewhere out there…',                                        audio: 'voice/s4/somewhere out there.mp3' },
+      { type: 'song', title: 'Somewhere Out There', emoji: '🌠', audio: 'music/Somewhere Out There.mp3' },
+    ],
+  },
+  {
+    id: 's5', num: 5, title: 'Dogtanian and the Three Musketeers!', emoji: '🗡️',
+    groups: ['butterflyBoys'],
+    items: [
+      { type: 'line', group: 'butterflyBoys', text: 'Dogtanian and Porthos, Athos and Aramis meet.',                                        audio: 'voice/s5/Dogtanian and Porthos, Athos and Aramis.mp3' },
+      { type: 'line', group: 'butterflyBoys', text: 'The guards come to stop them and they have a mighty duel!',                            audio: 'voice/s5/The guards come to stop them.mp3' },
+      { type: 'line', group: 'butterflyBoys', text: 'Now they know they are on the same team!',                                             audio: 'voice/s5/Now they know they are.mp3' },
+      { type: 'line', group: 'butterflyBoys', text: 'Dogtanian fights bravely and becomes a musketeer.',                                    audio: 'voice/s5/Dogtanian fights bravely.mp3' },
+      { type: 'line', group: 'butterflyBoys', text: 'The enemies of the King and Queen better watch out, the musketeers are out to get them!', audio: 'voice/s5/The enemies of the King and Queen better watch out.mp3' },
+      { type: 'song', title: 'Who Let the Dogs Out', emoji: '🐕', audio: 'music/Who Let The Dogs Out.mp3' },
+    ],
+  },
+  {
+    id: 's6', num: 6, title: 'I Really Like You!', emoji: '💕',
+    groups: ['butterflyGirls'],
+    items: [
+      { type: 'line', group: 'butterflyGirls', text: 'Juliette goes to find Dogtanian.',                                               audio: 'voice/s6/Juliette goes to find Dogtanian.mp3' },
+      { type: 'line', group: 'butterflyGirls', text: 'She sees him become a musketeer!',                                               audio: 'voice/s6/She sees him become a musketeer.mp3' },
+      { type: 'line', group: 'butterflyGirls', text: 'She knows he will help the King and Queen just like she does.',                  audio: 'voice/s6/She knows he will help the King and Queen.mp3' },
+      { type: 'line', group: 'butterflyGirls', text: 'Then, they know… Juliette likes Dogtanian.',                                    audio: 'voice/s6/Then, they know.mp3' },
+      { type: 'line', group: 'butterflyGirls', text: 'and Dogtanian likes Juliette!',                                                  audio: 'voice/s6/and Dogtanian likes Juliette.mp3' },
+      { type: 'song', title: 'I Really Like You', emoji: '💖', audio: 'music/I Really Like You.mp3' },
+    ],
+  },
+  {
+    id: 's7', num: 7, title: 'Our Graduation!', emoji: '🎓',
+    groups: ['all'],
+    items: [
+      { type: 'line', group: 'all', text: "Dear parents, The spirit of 'One for All and All for One' means we will help each other, stand up for those less fortunate, and strive to do what is right.", audio: 'voice/s7/Dear parents, The spirit of.mp3' },
+      { type: 'direction', text: 'Change positions.' },
+      { type: 'line', group: 'all', text: 'It is a spirit we will take with us on the rest of journey in Wego, and throughout our lives.', audio: 'voice/s7/It is a spirit we will take with us.mp3' },
+      { type: 'line', group: 'all', text: "To be the best, we will always remember 'One for All and All for One.'", audio: 'voice/s7/To be the best.mp3' },
+      { type: 'direction', text: 'Arms!' },
+      { type: 'song', title: "You're the Best Around", emoji: '🏆', audio: "music/You're The Best.mp3" },
+    ],
+  },
+];
+
+const TABS = [
+  { id: 'all',            label: '🎬 All Scenes',      groupFilter: null },
+  { id: 'captains',       label: '👑 Captains',         groupFilter: 'captains' },
+  { id: 'bumblebeeBoys',  label: '🐝 Bumblebee Boys',   groupFilter: 'bumblebeeBoys' },
+  { id: 'bumblebeeGirls', label: '🌸 Bumblebee Girls',  groupFilter: 'bumblebeeGirls' },
+  { id: 'butterflyBoys',  label: '🦋 Butterfly Boys',   groupFilter: 'butterflyBoys' },
+  { id: 'butterflyGirls', label: '🌺 Butterfly Girls',  groupFilter: 'butterflyGirls' },
+];
+
+// ── Audio engine ───────────────────────────────────────
+let _curAudio   = null;
+let _curSetIdle = null;
+let _seqId      = 0;
+let _onSeqAbort = null;
+
+function stopEngine() {
+  _seqId++;
+  if (_onSeqAbort)  { const fn = _onSeqAbort; _onSeqAbort = null; fn(); }
+  if (_curAudio)    { _curAudio.pause(); _curAudio.currentTime = 0; _curAudio = null; }
+  if (_curSetIdle)  { const fn = _curSetIdle; _curSetIdle = null; fn(); }
+}
+
+async function playEngine(src, onIdle, volume = 1.0) {
+  stopEngine();
+  const audio = new Audio(src);
+  audio.volume = Math.min(1.0, volume);
+  _curAudio   = audio;
+  _curSetIdle = onIdle;
+  const cleanup = () => {
+    if (_curAudio === audio) { _curAudio = null; _curSetIdle = null; }
+    onIdle();
+  };
+  audio.onended = cleanup;
+  audio.onerror = cleanup;
+  await audio.play();
+}
+
+async function playSequence(tracks, onDone, onAbort) {
+  stopEngine();           // kills previous sequence, fires its onAbort
+  _onSeqAbort = onAbort;
+  const myId = _seqId;
+
+  for (let i = 0; i < tracks.length; i++) {
+    if (_seqId !== myId) return;
+    const { src, vol = 1.0 } = tracks[i];
+    await new Promise((resolve) => {
+      const audio = new Audio(src);
+      audio.volume = Math.min(1.0, vol);
+      _curAudio   = audio;
+      _curSetIdle = resolve;
+      const cleanup = () => {
+        if (_curAudio === audio) { _curAudio = null; _curSetIdle = null; }
+        resolve();
+      };
+      audio.onended = cleanup;
+      audio.onerror = cleanup;
+      audio.play().catch(resolve);
+    });
+    if (_seqId !== myId) return;
+    if (i < tracks.length - 1) await new Promise(r => setTimeout(r, 600));
+  }
+  if (_seqId === myId) { _onSeqAbort = null; onDone(); }
+}
+
+// ── Audio play button ──────────────────────────────────
+function AudioPlayBtn({ src, color }) {
+  const [st, setSt] = useState('idle'); // idle | loading | playing
+  const hasAudio = Boolean(src && src.trim());
+
+  const handleClick = async (e) => {
+    e.stopPropagation();
+    if (!hasAudio) return;
+    if (st === 'playing') { stopEngine(); setSt('idle'); return; }
+    setSt('loading');
+    try {
+      await playEngine(src, () => setSt('idle'));
+      setSt('playing');
+    } catch(err) { console.warn(err); setSt('idle'); }
+  };
+
+  const icon = !hasAudio ? '🔇' : st === 'loading' ? '⏳' : st === 'playing' ? '🔊' : '▶';
+  return (
+    <button
+      onClick={handleClick}
+      disabled={!hasAudio || st === 'loading'}
+      className={`audio-play-btn${st === 'playing' ? ' anim-pulse' : ''}`}
+      style={{
+        background:  !hasAudio ? '#f1f5f9' : st === 'playing' ? color : color + '22',
+        color:       !hasAudio ? '#cbd5e1' : st === 'playing' ? '#fff' : color,
+        borderColor: !hasAudio ? '#e2e8f0' : color,
+      }}
+      title={!hasAudio ? 'Audio coming soon' : st === 'playing' ? 'Stop' : 'Play audio'}
+    >{icon}</button>
+  );
+}
+
+// ── Song play button ───────────────────────────────────
+function SongPlayBtn({ src, color, vol = 1.0 }) {
+  const [st, setSt] = useState('idle'); // idle | loading | playing
+  const hasAudio = Boolean(src && src.trim());
+
+  const toggle = async (e) => {
+    e.stopPropagation();
+    if (!hasAudio) return;
+    if (st === 'playing') { stopEngine(); setSt('idle'); return; }
+    setSt('loading');
+    try {
+      await playEngine(src, () => setSt('idle'), vol);
+      setSt('playing');
+    } catch(err) { console.warn(err); setSt('idle'); }
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      disabled={!hasAudio || st === 'loading'}
+      className={`song-play-btn${st === 'playing' ? ' anim-pulse' : ''}`}
+      style={{
+        background:  !hasAudio ? '#f1f5f9' : st === 'playing' ? color : color + '18',
+        color:       !hasAudio ? '#94a3b8' : st === 'playing' ? '#fff' : color,
+        borderColor: !hasAudio ? '#e2e8f0' : color,
+      }}
+    >
+      <span>{!hasAudio ? '🔇' : st === 'loading' ? '⏳' : st === 'playing' ? '⏹' : '🎵'}</span>
+      {!hasAudio ? 'Music Coming Soon' : st === 'loading' ? 'Loading…' : st === 'playing' ? 'Stop Music' : 'Play Music'}
+    </button>
+  );
+}
+
+// ── Stage direction ────────────────────────────────────
+function StageDirection({ text }) {
+  return (
+    <div className="stage-direction">
+      <span style={{ fontSize: 18, flexShrink: 0 }}>🎬</span>
+      <span className="stage-direction-text">{text}</span>
+    </div>
+  );
+}
+
+// ── Song cue ──────────────────────────────────────────
+function SongCue({ item, color }) {
+  return (
+    <div
+      className="song-cue"
+      style={{ background: color + '0d', borderColor: color + '38' }}
+    >
+      <div className="song-cue-info">
+        <span className="song-cue-emoji">{item.emoji}</span>
+        <div>
+          <div className="song-cue-label" style={{ color: color + 'aa' }}>🎵 Song</div>
+          <div className="song-cue-title" style={{ color }}>{item.title}</div>
+        </div>
+      </div>
+      <SongPlayBtn src={item.audio} color={color} vol={item.vol ?? 1.0} />
+    </div>
+  );
+}
+
+// ── Line bubble ────────────────────────────────────────
+function LineBubble({ item, itemKey, activeGroup, highlighted, onToggle }) {
+  const g = GROUPS[item.group];
+  const isDimmed = activeGroup && item.group !== activeGroup && item.group !== 'all';
+  const isMarked = highlighted.has(itemKey);
+
+  return (
+    <div
+      className={`line-bubble${isDimmed ? ' is-dimmed' : ''}`}
+      onClick={() => onToggle(itemKey)}
+      style={{
+        background:   isMarked ? g.color + '24' : g.bg,
+        borderColor:  isMarked ? g.color : g.border,
+        borderLeftColor: g.color,
+        boxShadow:    isMarked ? `0 0 0 3px ${g.color}2e` : 'none',
+      }}
+    >
+      <div className="line-bubble-top">
+        <span
+          className="group-chip"
+          style={{ background: g.color + '1a', color: g.color, borderColor: g.color + '30' }}
+        >
+          {g.emoji} {g.label}
+        </span>
+        <AudioPlayBtn src={item.audio} color={g.color} />
+      </div>
+      <div className="line-text">{item.text}</div>
+      {isMarked ? (
+        <div
+          className="line-marked-badge"
+          style={{ background: g.color + '22', color: g.color }}
+        >
+          ✓ Marked — tap to clear
+        </div>
+      ) : (
+        <div className="line-tap-hint">Tap to mark your place</div>
+      )}
+    </div>
+  );
+}
+
+// ── Scene play bar ─────────────────────────────────────
+function ScenePlayBar({ scene, color }) {
+  const [mode, setMode] = useState('idle'); // idle | lines | all
+
+  const lineTracks = scene.items
+    .filter(i => i.type === 'line' && i.audio?.trim())
+    .map(i => ({ src: i.audio, vol: 1.0 }));
+
+  const songItem  = scene.items.find(i => i.type === 'song' && i.audio?.trim());
+  const songTrack = songItem ? { src: songItem.audio, vol: songItem.vol ?? 1.0 } : null;
+
+  const hasLines = lineTracks.length > 0;
+  const hasSong  = Boolean(songTrack);
+  const isPlaying = mode !== 'idle';
+
+  const done  = () => setMode('idle');
+  const abort = () => setMode('idle');
+
+  const startPlay = async (tracks, m) => {
+    if (!tracks.length) return;
+    setMode(m);
+    await playSequence(tracks, done, abort);
+  };
+
+  const stop = () => { stopEngine(); setMode('idle'); };
+
+  const allTracks = [...lineTracks, ...(songTrack ? [songTrack] : [])];
+
+  return (
+    <div className="scene-play-bar">
+      {isPlaying ? (
+        <button onClick={stop} className="scene-seq-stop" style={{ color, borderColor: color + '55' }}>
+          ⏹ Stop
+        </button>
+      ) : (
+        <>
+          <button
+            onClick={() => startPlay(lineTracks, 'lines')}
+            disabled={!hasLines}
+            className="scene-seq-btn"
+            style={{
+              background:  hasLines ? color + '15' : '#f1f5f9',
+              color:       hasLines ? color : '#94a3b8',
+              borderColor: hasLines ? color + '45' : '#e2e8f0',
+            }}
+          >
+            ▶ Play Lines
+          </button>
+          <button
+            onClick={() => startPlay(allTracks, 'all')}
+            disabled={!hasLines && !hasSong}
+            className="scene-seq-btn"
+            style={{
+              background:  (hasLines || hasSong) ? color : '#f1f5f9',
+              color:       (hasLines || hasSong) ? '#fff' : '#94a3b8',
+              borderColor: (hasLines || hasSong) ? color : '#e2e8f0',
+            }}
+          >
+            🎵 Lines + Song
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Scene card ─────────────────────────────────────────
+function SceneCard({ scene, activeGroup, highlighted, onToggle }) {
+  const primaryColor = GROUPS[scene.groups[0]]?.color || '#64748b';
+  const lineCount = scene.items.filter(i => i.type === 'line').length;
+
+  return (
+    <div className="scene-card">
+      <div className="scene-card-header">
+        <div className="scene-num-badge" style={{ background: primaryColor }}>
+          {scene.num}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="scene-title">{scene.emoji} {scene.title}</div>
+          <div className="scene-meta">
+            {scene.groups.map(gid => {
+              const g = GROUPS[gid];
+              return (
+                <span
+                  key={gid}
+                  className="group-chip"
+                  style={{ background: g.color + '18', color: g.color, borderColor: g.color + '28' }}
+                >
+                  {g.emoji} {g.label}
+                </span>
+              );
+            })}
+            <span className="count-chip">{lineCount} lines</span>
+          </div>
+        </div>
+      </div>
+
+      <ScenePlayBar scene={scene} color={primaryColor} />
+
+      <div className="scene-items">
+        {scene.items.map((item, idx) => {
+          const key = `${scene.id}-${idx}`;
+          if (item.type === 'direction') return <StageDirection key={key} text={item.text} />;
+          if (item.type === 'song')      return <SongCue key={key} item={item} color={primaryColor} />;
+          if (item.type === 'line')      return (
+            <LineBubble
+              key={key} item={item} itemKey={key}
+              activeGroup={activeGroup}
+              highlighted={highlighted}
+              onToggle={onToggle}
+            />
+          );
+          return null;
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── App ────────────────────────────────────────────────
+const STARS = ['⭐','🌟','✨','💫','⭐','🌟','✨'];
+
+function App() {
+  const [activeGroup, setActiveGroup] = useState(null);
+  const [activeScene, setActiveScene] = useState(null);
+  const [highlighted, setHighlighted] = useState(new Set());
+
+  const groupInfo = activeGroup ? GROUPS[activeGroup] : null;
+
+  // Mutually exclusive: group OR scene, never both
+  const selectGroup = (key) => {
+    setActiveGroup(prev => prev === key ? null : key);
+    setActiveScene(null);
+  };
+  const selectScene = (id) => {
+    setActiveScene(prev => prev === id ? null : id);
+    setActiveGroup(null);
+  };
+
+  const visibleScenes = SCENES.filter(s => {
+    if (activeScene) return s.id === activeScene;
+    if (activeGroup) return s.groups.includes(activeGroup);
+    return true;
+  });
+
+  const totalLines = visibleScenes.reduce(
+    (sum, s) => sum + s.items.filter(i => i.type === 'line').length, 0
+  );
+
+  const markedCount = [...highlighted].filter(k =>
+    visibleScenes.some(s => k.startsWith(s.id))
+  ).length;
+
+  const toggleHighlight = useCallback((key) => {
+    setHighlighted(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }, []);
+
+  return (
+    <div className="app-wrap">
+      {/* ── Header ── */}
+      <header className="app-header">
+        <div className="banner-stars" aria-hidden="true">
+          {STARS.map((s, i) => (
+            <span key={i} className="banner-star" style={{ animationDelay: `${i * 0.3}s` }}>{s}</span>
+          ))}
+        </div>
+        <span className="header-main-emoji" role="img" aria-label="theater masks">🎭</span>
+        <h1 className="app-title">Juliette and the Musketeers!</h1>
+        <p className="app-subtitle">K3-5 Graduation Show 🎓 Script Practice</p>
+        <p className="app-motto">"One for All and All for One" ⚔️</p>
+      </header>
+
+      {/* ── Tab nav ── */}
+      <nav className="tab-nav">
+        <div className="nav-label">Group</div>
+        <div className="tab-bar">
+          {/* All — full width */}
+          {(() => {
+            const isActive = !activeGroup && !activeScene;
+            return (
+              <button
+                onClick={() => { setActiveGroup(null); setActiveScene(null); }}
+                className="tab-btn tab-btn-all"
+                style={{
+                  background:  isActive ? '#1e293b' : '#f8fafc',
+                  color:       isActive ? '#fff' : '#475569',
+                  borderColor: isActive ? '#1e293b' : '#cbd5e1',
+                  boxShadow:   isActive ? '0 2px 8px rgba(30,41,59,.22)' : 'none',
+                }}
+              >
+                🎬 All Scenes
+              </button>
+            );
+          })()}
+          {/* 6 groups — 3 per row */}
+          {Object.entries(GROUPS).map(([key, g]) => {
+            const isActive = activeGroup === key;
+            return (
+              <button
+                key={key}
+                onClick={() => selectGroup(key)}
+                className="tab-btn"
+                style={{
+                  background:  isActive ? g.color : '#f8fafc',
+                  color:       isActive ? '#fff' : g.color,
+                  borderColor: isActive ? g.color : g.color + '66',
+                  boxShadow:   isActive ? `0 2px 10px ${g.color}40` : 'none',
+                }}
+              >
+                {g.emoji} {g.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="scene-bar-divider" />
+        <div className="nav-label">Scene</div>
+
+        <div className="scene-bar">
+          {SCENES.map(scene => {
+            const isActive = activeScene === scene.id;
+            const color    = GROUPS[scene.groups[0]]?.color || '#64748b';
+            return (
+              <button
+                key={scene.id}
+                onClick={() => selectScene(scene.id)}
+                className="scene-btn"
+                style={{
+                  background:  isActive ? color : '#f8fafc',
+                  color:       isActive ? '#fff' : color,
+                  borderColor: isActive ? color : color + '55',
+                  boxShadow:   isActive ? `0 2px 8px ${color}38` : 'none',
+                }}
+              >
+                <span className="scene-btn-num">{scene.num}</span>
+                <span className="scene-btn-emoji">{scene.emoji}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <main>
+        {/* ── Group banner ── */}
+        {groupInfo && (
+          <div
+            key={activeGroup}
+            className="group-banner anim-slideUp"
+            style={{ background: groupInfo.bg, borderColor: groupInfo.border }}
+          >
+            <span className="group-banner-emoji">{groupInfo.emoji}</span>
+            <div>
+              <div className="group-banner-title" style={{ color: groupInfo.color }}>
+                {groupInfo.label}
+              </div>
+              <div className="group-banner-sub">
+                {visibleScenes.length} scene{visibleScenes.length !== 1 ? 's' : ''} · {totalLines} lines
+                {markedCount > 0 && ` · ✓ ${markedCount} marked`}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── All-scenes summary bar ── */}
+        {!activeGroup && (
+          <div
+            className="group-banner anim-slideUp"
+            style={{ background: '#fff', borderColor: '#e2e8f0', border: '2px solid #e2e8f0' }}
+          >
+            <span style={{ fontSize: 'clamp(28px, 7vw, 38px)' }}>📜</span>
+            <div>
+              <div className="group-banner-title" style={{ color: '#1e293b' }}>Full Script</div>
+              <div className="group-banner-sub">
+                7 scenes · {SCENES.reduce((s, sc) => s + sc.items.filter(i => i.type === 'line').length, 0)} lines total
+                {highlighted.size > 0 && ` · ✓ ${highlighted.size} marked`}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Scene list ── */}
+        <div>
+          {visibleScenes.map((scene, idx) => (
+            <div
+              key={scene.id}
+              className="anim-slideUp"
+              style={{ animationDelay: `${idx * 0.06}s` }}
+            >
+              <SceneCard
+                scene={scene}
+                activeGroup={activeGroup}
+                highlighted={highlighted}
+                onToggle={toggleHighlight}
+              />
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
