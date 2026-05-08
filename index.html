@@ -408,16 +408,6 @@
       color: #1e293b;
       line-height: 1.5;
     }
-    .line-marked-badge {
-      margin-top: 7px;
-      display: inline-block;
-      font-size: 12px; font-weight: 800;
-      padding: 3px 10px; border-radius: 6px;
-    }
-    .line-tap-hint {
-      font-size: 11px; font-weight: 700;
-      color: #cbd5e1; margin-top: 5px;
-    }
     @media (max-width: 480px) {
       .line-bubble { padding: 10px 11px; }
     }
@@ -775,20 +765,17 @@ function SongCue({ item, color }) {
 }
 
 // ── Line bubble ────────────────────────────────────────
-function LineBubble({ item, itemKey, activeGroup, highlighted, onToggle }) {
+function LineBubble({ item, activeGroup }) {
   const g = GROUPS[item.group];
   const isDimmed = activeGroup && item.group !== activeGroup && item.group !== 'all';
-  const isMarked = highlighted.has(itemKey);
 
   return (
     <div
       className={`line-bubble${isDimmed ? ' is-dimmed' : ''}`}
-      onClick={() => onToggle(itemKey)}
       style={{
-        background:   isMarked ? g.color + '24' : g.bg,
-        borderColor:  isMarked ? g.color : g.border,
+        background:      g.bg,
+        borderColor:     g.border,
         borderLeftColor: g.color,
-        boxShadow:    isMarked ? `0 0 0 3px ${g.color}2e` : 'none',
       }}
     >
       <div className="line-bubble-top">
@@ -801,16 +788,6 @@ function LineBubble({ item, itemKey, activeGroup, highlighted, onToggle }) {
         <AudioPlayBtn src={item.audio} color={g.color} />
       </div>
       <div className="line-text">{item.text}</div>
-      {isMarked ? (
-        <div
-          className="line-marked-badge"
-          style={{ background: g.color + '22', color: g.color }}
-        >
-          ✓ Marked — tap to clear
-        </div>
-      ) : (
-        <div className="line-tap-hint">Tap to mark your place</div>
-      )}
     </div>
   );
 }
@@ -972,7 +949,7 @@ function ScenePlayBar({ scene, color }) {
 }
 
 // ── Scene card ─────────────────────────────────────────
-function SceneCard({ scene, activeGroup, highlighted, onToggle }) {
+function SceneCard({ scene, activeGroup }) {
   const primaryColor = GROUPS[scene.groups[0]]?.color || '#64748b';
   const lineCount = scene.items.filter(i => i.type === 'line').length;
 
@@ -1010,12 +987,7 @@ function SceneCard({ scene, activeGroup, highlighted, onToggle }) {
           if (item.type === 'direction') return <StageDirection key={key} text={item.text} />;
           if (item.type === 'song')      return <SongCue key={key} item={item} color={primaryColor} />;
           if (item.type === 'line')      return (
-            <LineBubble
-              key={key} item={item} itemKey={key}
-              activeGroup={activeGroup}
-              highlighted={highlighted}
-              onToggle={onToggle}
-            />
+            <LineBubble key={key} item={item} activeGroup={activeGroup} />
           );
           return null;
         })}
@@ -1030,7 +1002,6 @@ const STARS = ['⭐','🌟','✨','💫','⭐','🌟','✨'];
 function App() {
   const [activeGroup, setActiveGroup] = useState(null);
   const [activeScene, setActiveScene] = useState(null);
-  const [highlighted, setHighlighted] = useState(new Set());
 
   const groupInfo = activeGroup ? GROUPS[activeGroup] : null;
 
@@ -1053,18 +1024,6 @@ function App() {
   const totalLines = visibleScenes.reduce(
     (sum, s) => sum + s.items.filter(i => i.type === 'line').length, 0
   );
-
-  const markedCount = [...highlighted].filter(k =>
-    visibleScenes.some(s => k.startsWith(s.id))
-  ).length;
-
-  const toggleHighlight = useCallback((key) => {
-    setHighlighted(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
-  }, []);
 
   /* Musketeer decorative background elements */
   const stageDeco = [
@@ -1248,7 +1207,6 @@ function App() {
               </div>
               <div className="group-banner-sub">
                 {visibleScenes.length} scene{visibleScenes.length !== 1 ? 's' : ''} · {totalLines} lines
-                {markedCount > 0 && ` · ✓ ${markedCount} marked`}
               </div>
             </div>
           </div>
@@ -1265,7 +1223,6 @@ function App() {
               <div className="group-banner-title" style={{ color: '#1e293b' }}>Full Script</div>
               <div className="group-banner-sub">
                 7 scenes · {SCENES.reduce((s, sc) => s + sc.items.filter(i => i.type === 'line').length, 0)} lines total
-                {highlighted.size > 0 && ` · ✓ ${highlighted.size} marked`}
               </div>
             </div>
           </div>
@@ -1279,12 +1236,7 @@ function App() {
               className="anim-slideUp"
               style={{ animationDelay: `${idx * 0.06}s` }}
             >
-              <SceneCard
-                scene={scene}
-                activeGroup={activeGroup}
-                highlighted={highlighted}
-                onToggle={toggleHighlight}
-              />
+              <SceneCard scene={scene} activeGroup={activeGroup} />
             </div>
           ))}
         </div>
