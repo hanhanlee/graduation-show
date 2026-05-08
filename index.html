@@ -16,12 +16,143 @@
     html { -webkit-text-size-adjust: 100%; }
     body {
       font-family: 'Nunito', sans-serif;
-      background: #f0f4ff;
+      background: #08061a;
       min-height: 100vh;
       min-height: 100dvh;
       color: #1e293b;
       -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
     }
+
+    /* ── Stage backdrop + spotlight ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 55% at 50% -5%,  rgba(255,215,80,.22) 0%, rgba(255,160,30,.06) 45%, transparent 70%),
+        radial-gradient(ellipse 90% 40% at 50% 105%, rgba(120,60,200,.18) 0%, transparent 60%),
+        linear-gradient(180deg, #08061a 0%, #0e0830 40%, #130a38 65%, #08061a 100%);
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    /* ── Side curtains ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg,
+          rgba(90,8,18,1)   0%,
+          rgba(110,10,22,.8) 2.5%,
+          rgba(80,5,15,.4)  6%,
+          transparent       14%
+        ),
+        linear-gradient(270deg,
+          rgba(90,8,18,1)   0%,
+          rgba(110,10,22,.8) 2.5%,
+          rgba(80,5,15,.4)  6%,
+          transparent       14%
+        );
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ── Musketeer deco elements ── */
+    .stage-deco {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .stage-deco-item {
+      position: absolute;
+      line-height: 1;
+      user-select: none;
+      transform-origin: center;
+    }
+    @keyframes decoFloat {
+      0%, 100% { transform: var(--base-transform) translateY(0px); }
+      50%       { transform: var(--base-transform) translateY(-10px); }
+    }
+
+    /* ── Twinkling stars ── */
+    .stage-stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .stage-star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      animation: starTwinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
+    }
+    @keyframes starTwinkle {
+      0%, 100% { opacity: var(--lo, .1); transform: scale(1); }
+      50%       { opacity: var(--hi, .7); transform: scale(1.4); }
+    }
+    /* ── Graduation celebration animation ── */
+    .grad-celebration {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+
+    /* Stars: born at top, fall downward */
+    .grad-star {
+      position: absolute;
+      top: -5%;
+      left: var(--x, 50%);
+      font-size: var(--sz, 16px);
+      line-height: 1;
+      animation: starFall var(--dur, 3s) ease-in var(--delay, 0s) infinite both;
+      will-change: transform, opacity;
+    }
+    @keyframes starFall {
+      0%   { transform: translateY(0) translateX(0) scale(0); opacity: 0; }
+      12%  { opacity: 1; transform: translateY(20px) translateX(0) scale(1.2); }
+      85%  { opacity: .85; }
+      100% { transform: translateY(var(--dy, 300px)) translateX(var(--dx, 0px)) scale(.6); opacity: 0; }
+    }
+
+    /* Confetti: also from top, falling */
+    .grad-piece {
+      position: absolute;
+      top: -2%;
+      left: var(--x, 50%);
+      animation: confFall var(--dur, 2.5s) ease-in var(--delay, 0s) infinite both;
+      will-change: transform, opacity;
+    }
+    @keyframes confFall {
+      0%   { transform: translateY(0) translateX(0) rotate(0deg) scale(1); opacity: 1; }
+      80%  { opacity: .8; }
+      100% { transform: translateY(var(--dy, 250px)) translateX(var(--dx, 30px)) rotate(var(--rot, 360deg)) scale(.3); opacity: 0; }
+    }
+
+    /* Caps: born near nav area, fly upward */
+    .grad-cap-fly {
+      position: absolute;
+      top: var(--from-top, 52vh);
+      left: var(--x, 50%);
+      font-size: var(--sz, 24px);
+      line-height: 1;
+      animation: capUp var(--dur, 3s) ease-out var(--delay, 0s) infinite both;
+      will-change: transform, opacity;
+    }
+    @keyframes capUp {
+      0%   { transform: translateY(0) translateX(0) scale(0) rotate(0deg); opacity: 0; }
+      15%  { transform: translateY(-25px) translateX(0) scale(1.3) rotate(-8deg); opacity: 1; }
+      85%  { opacity: .8; }
+      100% { transform: translateY(var(--dy, -280px)) translateX(var(--dx, 20px)) scale(.55) rotate(var(--rot, 25deg)); opacity: 0; }
+    }
+
     button {
       font-family: 'Nunito', sans-serif;
       cursor: pointer;
@@ -70,13 +201,13 @@
     .app-subtitle {
       font-size: clamp(13px, 3vw, 16px);
       font-weight: 800;
-      color: #64748b;
+      color: rgba(255,255,255,0.7);
       margin-bottom: 4px;
     }
     .app-motto {
       font-size: clamp(12px, 2.5vw, 14px);
       font-weight: 700;
-      color: #94a3b8;
+      color: rgba(255,255,255,0.45);
     }
     @media (max-width: 480px) { .app-header { padding: 16px 8px 12px; } }
 
@@ -684,6 +815,96 @@ function LineBubble({ item, itemKey, activeGroup, highlighted, onToggle }) {
   );
 }
 
+// ── Graduation celebration ─────────────────────────────
+const CONF_COLORS = ['#F59E0B','#EC4899','#8B5CF6','#3B82F6','#10B981','#EF4444','#F97316','#FFD700','#e879f9','#38bdf8','#fb7185','#a3e635'];
+
+function GradCelebration() {
+  const pieces = React.useMemo(() => {
+    const p = [];
+
+    // Stars: 24 pieces, full-width spread, fall down
+    for (let i = 0; i < 24; i++) {
+      p.push({
+        type: 'star', id: `st${i}`,
+        icon: ['✨','⭐','💫','🌟'][i % 4],
+        sz:    14 + (i * 1481 % 12),
+        x:     2 + (i * 4993 % 96),      // 2%–98% viewport width
+        dx:   -35 + (i * 2237 % 70),
+        dy:   180 + (i * 3571 % 220),    // fall 180–400px down
+        dur:   2 + (i * 1327 % 22) / 10,
+        delay: (i * 3137 % 40) / 10,
+      });
+    }
+
+    // Confetti: 40 pieces, full-width, fall down
+    for (let i = 0; i < 40; i++) {
+      p.push({
+        type: 'conf', id: `c${i}`,
+        color: CONF_COLORS[i % CONF_COLORS.length],
+        w:     5 + (i * 7919 % 7),
+        h:     3 + (i * 6271 % 5),
+        shape: i % 3,
+        x:     1 + (i * 4993 % 98),      // 1%–99% viewport width
+        dx:   -50 + (i * 3571 % 100),
+        dy:   150 + (i * 5381 % 180),    // fall 150–330px
+        rot:  -300 + (i * 7213 % 600),
+        dur:   1.8 + (i * 1327 % 22) / 10,
+        delay: (i * 3137 % 38) / 10,
+      });
+    }
+
+    // Caps: left edge (0–14%) and right edge (86–100%) only
+    for (let i = 0; i < 10; i++) {
+      const onRight = i % 2 === 0;
+      const x = onRight
+        ? 86 + (i * 4993 % 12)   // 86–98%
+        :  2 + (i * 4993 % 12);  //  2–14%
+      p.push({
+        type: 'cap', id: `cap${i}`,
+        x,
+        dx:   -15 + (i * 2971 % 30),
+        dy:  -(200 + (i * 1847 % 180)),
+        rot:  -25 + (i * 3613 % 50),
+        sz:    20 + (i * 1973 % 14),
+        dur:   2.5 + (i * 2341 % 16) / 10,
+        delay: (i * 3137 % 32) / 10,
+      });
+    }
+    return p;
+  }, []);
+
+  return (
+    <div className="grad-celebration" aria-hidden="true">
+      {pieces.map(p => {
+        if (p.type === 'star') return (
+          <div key={p.id} className="grad-star" style={{
+            '--x': `${p.x}%`, '--sz': `${p.sz}px`,
+            '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
+            '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
+          }}>{p.icon}</div>
+        );
+        if (p.type === 'conf') return (
+          <div key={p.id} className="grad-piece" style={{
+            width: p.w, height: p.h,
+            background: p.color,
+            borderRadius: p.shape === 1 ? '50%' : '2px',
+            transform: p.shape === 2 ? 'rotate(45deg)' : 'none',
+            '--x': `${p.x}%`, '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
+            '--rot': `${p.rot}deg`, '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
+          }} />
+        );
+        return (
+          <div key={p.id} className="grad-cap-fly" style={{
+            '--x': `${p.x}%`, '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
+            '--rot': `${p.rot}deg`, '--sz': `${p.sz}px`,
+            '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
+          }}>🎓</div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Scene play bar ─────────────────────────────────────
 function ScenePlayBar({ scene, color }) {
   const [mode, setMode] = useState('idle'); // idle | lines | all
@@ -845,10 +1066,92 @@ function App() {
     });
   }, []);
 
+  /* Musketeer decorative background elements */
+  const stageDeco = [
+    // ── Fleur-de-lis in corners ──
+    { icon:'⚜', x:2,   y:3,  size:130, opacity:.055, rotate:0,   dur:6,   delay:0   },
+    { icon:'⚜', x:87,  y:2,  size:120, opacity:.05,  rotate:0,   dur:7,   delay:1.5 },
+    { icon:'⚜', x:3,   y:78, size:110, opacity:.045, rotate:0,   dur:8,   delay:0.8 },
+    { icon:'⚜', x:88,  y:76, size:115, opacity:.05,  rotate:0,   dur:6.5, delay:2   },
+    // ── Fleur-de-lis centre accents ──
+    { icon:'⚜', x:48,  y:1,  size:80,  opacity:.035, rotate:0,   dur:9,   delay:3   },
+    { icon:'⚜', x:0,   y:42, size:70,  opacity:.03,  rotate:0,   dur:7.5, delay:1   },
+    { icon:'⚜', x:91,  y:44, size:72,  opacity:.03,  rotate:0,   dur:8,   delay:2.5 },
+    // ── Crossed swords ──
+    { icon:'⚔️', x:40, y:7,  size:95,  opacity:.055, rotate:12,  dur:7,   delay:0.5 },
+    { icon:'⚔️', x:10, y:38, size:85,  opacity:.045, rotate:-18, dur:8.5, delay:2   },
+    { icon:'⚔️', x:74, y:52, size:88,  opacity:.045, rotate:8,   dur:6.5, delay:1.2 },
+    { icon:'⚔️', x:55, y:83, size:78,  opacity:.04,  rotate:-12, dur:9,   delay:3.5 },
+    // ── Rose (for Juliette) ──
+    { icon:'🌹', x:91, y:28, size:75,  opacity:.06,  rotate:-20, dur:6,   delay:0.3 },
+    { icon:'🌹', x:1,  y:62, size:70,  opacity:.055, rotate:15,  dur:7.5, delay:2.8 },
+    { icon:'🌹', x:60, y:90, size:65,  opacity:.045, rotate:-8,  dur:8,   delay:1   },
+    // ── Paw prints (Dogtanian!) ──
+    { icon:'🐾', x:25, y:72, size:60,  opacity:.04,  rotate:20,  dur:9,   delay:4   },
+    { icon:'🐾', x:80, y:85, size:55,  opacity:.035, rotate:-15, dur:7,   delay:1.8 },
+    { icon:'🐾', x:18, y:18, size:50,  opacity:.03,  rotate:8,   dur:8.5, delay:3   },
+    // ── Crown ──
+    { icon:'👑', x:47, y:88, size:80,  opacity:.045, rotate:0,   dur:7,   delay:0.7 },
+  ];
+
+  /* Generate random stars once */
+  const stageStars = React.useMemo(() => {
+    const stars = [];
+    const positions = [
+      [12,8],[28,15],[42,5],[58,12],[72,7],[85,18],[95,10],
+      [5,25],[18,35],[35,28],[55,22],[68,32],[88,25],[97,40],
+      [8,55],[22,62],[38,48],[60,58],[78,50],[92,65],
+      [3,75],[20,80],[45,72],[65,78],[82,70],[96,82],
+    ];
+    positions.forEach(([x, y], i) => {
+      const size = 1 + Math.random() * 2;
+      stars.push({
+        id: i,
+        style: {
+          left: `${x}%`, top: `${y}%`,
+          width: size, height: size,
+          '--dur':   `${2.5 + Math.random() * 3}s`,
+          '--delay': `${Math.random() * 4}s`,
+          '--lo':    0.08 + Math.random() * 0.12,
+          '--hi':    0.5  + Math.random() * 0.5,
+        }
+      });
+    });
+    return stars;
+  }, []);
+
   return (
     <div className="app-wrap">
+      {/* ── Musketeer deco ── */}
+      <div className="stage-deco" aria-hidden="true">
+        {stageDeco.map((d, i) => (
+          <div
+            key={i}
+            className="stage-deco-item"
+            style={{
+              left:     `${d.x}%`,
+              top:      `${d.y}%`,
+              fontSize: d.size,
+              opacity:  d.opacity,
+              filter:   'blur(0.6px)',
+              '--base-transform': `rotate(${d.rotate}deg)`,
+              transform: `rotate(${d.rotate}deg)`,
+              animation: `decoFloat ${d.dur}s ease-in-out infinite ${d.delay}s`,
+            }}
+          >
+            {d.icon}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Stage stars ── */}
+      <div className="stage-stars" aria-hidden="true">
+        {stageStars.map(s => <div key={s.id} className="stage-star" style={s.style} />)}
+      </div>
+
       {/* ── Header ── */}
       <header className="app-header">
+        <GradCelebration />
         <div className="banner-stars" aria-hidden="true">
           {STARS.map((s, i) => (
             <span key={i} className="banner-star" style={{ animationDelay: `${i * 0.3}s` }}>{s}</span>
