@@ -103,6 +103,7 @@
       pointer-events: none;
       z-index: 50;   /* stars + confetti: above content */
       overflow: hidden;
+      transition: opacity 0.5s ease;
     }
     .grad-caps-layer {
       position: fixed;
@@ -955,7 +956,7 @@ function GradCelebration() {
       </div>
 
       {/* Stars + confetti — above content (z-index: 50) */}
-      <div className="grad-celebration" aria-hidden="true">
+      <div className="grad-celebration" aria-hidden="true" style={{ opacity: capsVisible ? 1 : 0 }}>
         {others.map(p => {
           if (p.type === 'star') return (
             <div key={p.id} className="grad-star" style={{
