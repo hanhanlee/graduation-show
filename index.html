@@ -101,7 +101,14 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 50;
+      z-index: 50;   /* stars + confetti: above content */
+      overflow: hidden;
+    }
+    .grad-caps-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;    /* caps: below main content */
       overflow: hidden;
     }
 
@@ -165,6 +172,8 @@
       max-width: 820px;
       margin: 0 auto;
       padding: 0 16px calc(36px + env(safe-area-inset-bottom));
+      position: relative;
+      z-index: 2;
     }
     @media (max-width: 480px) {
       .app-wrap { padding: 0 10px calc(24px + env(safe-area-inset-bottom)); }
@@ -222,6 +231,65 @@
       top: 6px;
       z-index: 100;
     }
+
+    /* Mobile collapse toggle */
+    .filter-toggle {
+      display: none;
+    }
+    .filter-body {
+      /* always visible on desktop */
+    }
+    @media (max-width: 640px) {
+      .tab-nav { padding: 10px 10px 8px; }
+      .filter-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        background: none;
+        border: none;
+        padding: 2px 2px 0;
+        cursor: pointer;
+        gap: 8px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .filter-toggle-left {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 14px; font-weight: 800; color: #1e293b;
+      }
+      .filter-toggle-chip {
+        font-size: 12px; font-weight: 800;
+        padding: 3px 10px; border-radius: 999px;
+        background: #f1f5f9; color: #475569;
+        white-space: nowrap; max-width: 160px;
+        overflow: hidden; text-overflow: ellipsis;
+      }
+      .filter-toggle-chip.active {
+        background: var(--chip-color, #1e293b);
+        color: #fff;
+      }
+      .filter-toggle-chevron {
+        font-size: 12px; color: #94a3b8;
+        transition: transform .25s ease;
+        flex-shrink: 0;
+      }
+      .filter-toggle-chevron.open { transform: rotate(180deg); }
+      .filter-body {
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height .3s ease, opacity .25s ease;
+        opacity: 0;
+      }
+      .filter-body.is-open {
+        max-height: 500px;
+        opacity: 1;
+      }
+      .filter-body-inner { padding-top: 10px; }
+    }
+    @media (min-width: 641px) {
+      .filter-toggle { display: none !important; }
+    }
+
     .nav-label {
       font-size: 10px; font-weight: 800;
       text-transform: uppercase; letter-spacing: 0.08em;
@@ -850,35 +918,47 @@ function GradCelebration() {
     return p;
   }, []);
 
+  const caps   = pieces.filter(p => p.type === 'cap');
+  const others = pieces.filter(p => p.type !== 'cap');
+
+  const renderCap = p => (
+    <div key={p.id} className="grad-cap-fly" style={{
+      '--x': `${p.x}%`, '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
+      '--rot': `${p.rot}deg`, '--sz': `${p.sz}px`,
+      '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
+    }}>🎓</div>
+  );
+
   return (
-    <div className="grad-celebration" aria-hidden="true">
-      {pieces.map(p => {
-        if (p.type === 'star') return (
-          <div key={p.id} className="grad-star" style={{
-            '--x': `${p.x}%`, '--sz': `${p.sz}px`,
-            '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
-            '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
-          }}>{p.icon}</div>
-        );
-        if (p.type === 'conf') return (
-          <div key={p.id} className="grad-piece" style={{
-            width: p.w, height: p.h,
-            background: p.color,
-            borderRadius: p.shape === 1 ? '50%' : '2px',
-            transform: p.shape === 2 ? 'rotate(45deg)' : 'none',
-            '--x': `${p.x}%`, '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
-            '--rot': `${p.rot}deg`, '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
-          }} />
-        );
-        return (
-          <div key={p.id} className="grad-cap-fly" style={{
-            '--x': `${p.x}%`, '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
-            '--rot': `${p.rot}deg`, '--sz': `${p.sz}px`,
-            '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
-          }}>🎓</div>
-        );
-      })}
-    </div>
+    <>
+      {/* Caps — behind main content (z-index: 1) */}
+      <div className="grad-caps-layer" aria-hidden="true">
+        {caps.map(renderCap)}
+      </div>
+
+      {/* Stars + confetti — above content (z-index: 50) */}
+      <div className="grad-celebration" aria-hidden="true">
+        {others.map(p => {
+          if (p.type === 'star') return (
+            <div key={p.id} className="grad-star" style={{
+              '--x': `${p.x}%`, '--sz': `${p.sz}px`,
+              '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
+              '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
+            }}>{p.icon}</div>
+          );
+          return (
+            <div key={p.id} className="grad-piece" style={{
+              width: p.w, height: p.h,
+              background: p.color,
+              borderRadius: p.shape === 1 ? '50%' : '2px',
+              transform: p.shape === 2 ? 'rotate(45deg)' : 'none',
+              '--x': `${p.x}%`, '--dx': `${p.dx}px`, '--dy': `${p.dy}px`,
+              '--rot': `${p.rot}deg`, '--dur': `${p.dur}s`, '--delay': `${p.delay}s`,
+            }} />
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -1002,6 +1082,7 @@ const STARS = ['⭐','🌟','✨','💫','⭐','🌟','✨'];
 function App() {
   const [activeGroup, setActiveGroup] = useState(null);
   const [activeScene, setActiveScene] = useState(null);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const groupInfo = activeGroup ? GROUPS[activeGroup] : null;
 
@@ -1123,74 +1204,115 @@ function App() {
       </header>
 
       {/* ── Tab nav ── */}
-      <nav className="tab-nav">
-        <div className="nav-label">Group</div>
-        <div className="tab-bar">
-          {/* All — full width */}
-          {(() => {
-            const isActive = !activeGroup && !activeScene;
-            return (
-              <button
-                onClick={() => { setActiveGroup(null); setActiveScene(null); }}
-                className="tab-btn tab-btn-all"
-                style={{
-                  background:  isActive ? '#1e293b' : '#f8fafc',
-                  color:       isActive ? '#fff' : '#475569',
-                  borderColor: isActive ? '#1e293b' : '#cbd5e1',
-                  boxShadow:   isActive ? '0 2px 8px rgba(30,41,59,.22)' : 'none',
-                }}
-              >
-                🎬 All Scenes
-              </button>
-            );
-          })()}
-          {/* 6 groups — 3 per row */}
-          {Object.entries(GROUPS).map(([key, g]) => {
-            const isActive = activeGroup === key;
-            return (
-              <button
-                key={key}
-                onClick={() => selectGroup(key)}
-                className="tab-btn"
-                style={{
-                  background:  isActive ? g.color : '#f8fafc',
-                  color:       isActive ? '#fff' : g.color,
-                  borderColor: isActive ? g.color : g.color + '66',
-                  boxShadow:   isActive ? `0 2px 10px ${g.color}40` : 'none',
-                }}
-              >
-                {g.emoji} {g.label}
-              </button>
-            );
-          })}
-        </div>
+      {(() => {
+        const activeSceneObj = activeScene ? SCENES.find(s => s.id === activeScene) : null;
+        const chipLabel = activeGroup
+          ? `${GROUPS[activeGroup].emoji} ${GROUPS[activeGroup].label}`
+          : activeSceneObj
+          ? `${activeSceneObj.emoji} Scene ${activeSceneObj.num}`
+          : null;
+        const chipColor = activeGroup
+          ? GROUPS[activeGroup].color
+          : activeSceneObj
+          ? GROUPS[activeSceneObj.groups[0]]?.color
+          : null;
 
-        <div className="scene-bar-divider" />
-        <div className="nav-label">Scene</div>
+        return (
+          <nav className="tab-nav">
+            {/* Mobile-only collapse toggle */}
+            <button
+              className="filter-toggle"
+              onClick={() => setFilterOpen(o => !o)}
+              aria-expanded={filterOpen}
+            >
+              <div className="filter-toggle-left">
+                <span>🎯 Filter</span>
+                {chipLabel && (
+                  <span
+                    className="filter-toggle-chip active"
+                    style={{ '--chip-color': chipColor }}
+                  >
+                    {chipLabel}
+                  </span>
+                )}
+                {!chipLabel && (
+                  <span className="filter-toggle-chip">All Scenes</span>
+                )}
+              </div>
+              <span className={`filter-toggle-chevron${filterOpen ? ' open' : ''}`}>▼</span>
+            </button>
 
-        <div className="scene-bar">
-          {SCENES.map(scene => {
-            const isActive = activeScene === scene.id;
-            const color    = GROUPS[scene.groups[0]]?.color || '#64748b';
-            return (
-              <button
-                key={scene.id}
-                onClick={() => selectScene(scene.id)}
-                className="scene-btn"
-                style={{
-                  background:  isActive ? color : '#f8fafc',
-                  color:       isActive ? '#fff' : color,
-                  borderColor: isActive ? color : color + '55',
-                  boxShadow:   isActive ? `0 2px 8px ${color}38` : 'none',
-                }}
-              >
-                <span className="scene-btn-num">{scene.num}</span>
-                <span className="scene-btn-emoji">{scene.emoji}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+            {/* Filter body — always visible on desktop, collapsible on mobile */}
+            <div className={`filter-body${filterOpen ? ' is-open' : ''}`}>
+              <div className="filter-body-inner">
+                <div className="nav-label">Group</div>
+                <div className="tab-bar">
+                  {(() => {
+                    const isActive = !activeGroup && !activeScene;
+                    return (
+                      <button
+                        onClick={() => { setActiveGroup(null); setActiveScene(null); setFilterOpen(false); }}
+                        className="tab-btn tab-btn-all"
+                        style={{
+                          background:  isActive ? '#1e293b' : '#f8fafc',
+                          color:       isActive ? '#fff' : '#475569',
+                          borderColor: isActive ? '#1e293b' : '#cbd5e1',
+                          boxShadow:   isActive ? '0 2px 8px rgba(30,41,59,.22)' : 'none',
+                        }}
+                      >
+                        🎬 All Scenes
+                      </button>
+                    );
+                  })()}
+                  {Object.entries(GROUPS).map(([key, g]) => {
+                    const isActive = activeGroup === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => { selectGroup(key); setFilterOpen(false); }}
+                        className="tab-btn"
+                        style={{
+                          background:  isActive ? g.color : '#f8fafc',
+                          color:       isActive ? '#fff' : g.color,
+                          borderColor: isActive ? g.color : g.color + '66',
+                          boxShadow:   isActive ? `0 2px 10px ${g.color}40` : 'none',
+                        }}
+                      >
+                        {g.emoji} {g.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="scene-bar-divider" />
+                <div className="nav-label">Scene</div>
+                <div className="scene-bar">
+                  {SCENES.map(scene => {
+                    const isActive = activeScene === scene.id;
+                    const color    = GROUPS[scene.groups[0]]?.color || '#64748b';
+                    return (
+                      <button
+                        key={scene.id}
+                        onClick={() => { selectScene(scene.id); setFilterOpen(false); }}
+                        className="scene-btn"
+                        style={{
+                          background:  isActive ? color : '#f8fafc',
+                          color:       isActive ? '#fff' : color,
+                          borderColor: isActive ? color : color + '55',
+                          boxShadow:   isActive ? `0 2px 8px ${color}38` : 'none',
+                        }}
+                      >
+                        <span className="scene-btn-num">{scene.num}</span>
+                        <span className="scene-btn-emoji">{scene.emoji}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </nav>
+        );
+      })()}
 
       <main>
         {/* ── Group banner ── */}
