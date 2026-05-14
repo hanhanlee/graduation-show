@@ -160,7 +160,7 @@ Dear parents, The spirit of ‘One for All and All for One’ means we will help
 Change positions.
 
 **Captains / All Students:**  
-It is a spirit we will take with us on the rest of journey in Wego, and throughout our lives.
+It is a spirit we will take with us on the rest of our journey in Wego, and throughout our lives.
 
 **Captains / All Students:**  
 To be the best, we will always remember
